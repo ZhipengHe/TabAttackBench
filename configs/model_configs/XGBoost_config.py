@@ -2,10 +2,10 @@ import numpy as np
 
 config_random = {
     "model_name": { # Name of the model
-        "value": "xgb"
+        "value": "XGBoost"
     },
     "model_type": { 
-    "value": "sklearn"
+        "value": "sklearn"
     },
     # Parameter space taken from Hyperopt-sklearn except when mentioned
     "model__max_depth": {
@@ -23,7 +23,7 @@ config_random = {
         #"max": 6000,
         #"q": 200
     },
-    "early_stopping_rounds": {
+    "model__early_stopping_rounds": {
         "value": 20
     },
     "model__gamma": {
@@ -65,9 +65,6 @@ config_random = {
     "model__use_label_encoder": {
         "value": False
     },
-    "transformed_target": {
-        "values": [False, True]
-    },
     "one_hot_encoder": {  # Use one-hot encoding for categorical variables when needed
         "value": True
     },
@@ -79,13 +76,10 @@ config_random = {
 
 config_default = {
     "model_name": { # Name of the model
-        "value": "xgb"
+        "value": "XGBoost"
     },
     "model_type": {
         "value": "sklearn"
-    },
-    "transformed_target": {
-        "values": [False]
     },
     "one_hot_encoder": {  # Use one-hot encoding for categorical variables when needed
         "value": True

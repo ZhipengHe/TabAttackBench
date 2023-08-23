@@ -29,8 +29,8 @@ model_keyword_dic = {}
 
 # XGBoost Classifier
 
-from configs.model_configs.xgb_config import config_default, config_random
-keyword = "xgb"
+from configs.model_configs.XGBoost_config import config_default, config_random
+keyword = "XGBoost"
 total_config[keyword] = {
     "random": config_random,
     "default": config_default

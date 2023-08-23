@@ -51,7 +51,7 @@ config_default = {
     "model_type": {
         "value": "sklearn" # or "skorch" or "tab_survey"
     },
-    "transformed_target": {
+    "transformed_target": { # TODO remove all transformed_target parameters for classification, used only for regression
         "value": False
     },
     "use_gpu": {
