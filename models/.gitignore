@@ -2,4 +2,3 @@ fingerprint.pb
 keras_metadata.pb
 saved_model.pb
 variables/
-assets/
