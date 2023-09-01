@@ -1,5 +1,6 @@
 """
 The implementation of Logistic Regression using JAX.
+Optimization algorithm: Basic Gradient Descent.
 """
 
 # import jax
@@ -57,10 +58,12 @@ class LogisticRegression:
         for epoch in range(self.num_epochs):
             # Compute gradients
             grads = grad_loss(params, X_train, y_train)
-            # Update parameters
-            params -= self.learning_rate * grads
-            # Compute and print the loss (optional)
+
+            # Basic gradient descent update
+            params -= self.learning_rate * grads    # Update parameters
+            
             loss = self.cross_entropy_loss(params, X_train, y_train)
+            # Compute and print the loss (optional)
             if (epoch + 1) % 100 == 0:
                 print(f"Epoch {epoch + 1}, Loss: {loss:.4f}")
 
