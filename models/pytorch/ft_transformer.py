@@ -188,7 +188,10 @@ class FTTransformer(nn.Module):
     def forward(self, x, return_attn = False):
         if not self.num_categories is None:
             x_categ = x[:, self.num_continuous:].long()
-            x_numer = x[:, :self.num_continuous]
+            if self.num_continuous == 0:
+                x_numer = None
+            else:
+                x_numer = x[:, :self.num_continuous]
         else:
             x_categ = None
             x_numer = x

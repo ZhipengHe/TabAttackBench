@@ -76,6 +76,8 @@ class MLP(nn.Module):
             self.embedding = nn.ModuleList([nn.Embedding(cat_dim, embedding_dim) for cat_dim in categories])
             # input_dim = (embedding_dim * num_categorical_feature) + num_numerical_feature
             input_dim = (embedding_dim * sum(categories)) + num_numerical_feature
+        
+        # print(f'{input_dim=}')
 
         # Create a list for all layers (input + hidden + output)
         self.layers = nn.ModuleList()
@@ -94,11 +96,17 @@ class MLP(nn.Module):
     def forward(self, x):
         # from data preprocessing, numerical features are first and categorical features are last
         if not self.num_categorical_feature is None:
-            x_num = x[:, :self.num_numerical_feature]
-            x_cat = x[:, self.num_numerical_feature:].long()
+            if self.num_numerical_feature > 0:
+                x_cat = x[:, self.num_numerical_feature:].long()
+                x_num = x[:, :self.num_numerical_feature]
+            else:
+                x_cat = x.long()
+                x_num = None
             # print(f"{x_num.shape=}")
             # print(f"{x_cat.shape=}")
 
+        xs = []
+        if self.num_categorical_feature > 0:
             ## One embedding for each categorical feature
             x_cat_emb = []
             start = 0
@@ -108,9 +116,22 @@ class MLP(nn.Module):
                 # print(f"{x_cat_emb[-1].shape=}")
                 start += item
             
-            x_cat_emb_flat = torch.cat(x_cat_emb, dim=-1)
-            # print(f"{x_cat_emb_flat.shape=}")
-            x = torch.cat([x_num, x_cat_emb_flat], dim=-1)
+            x_categ = torch.cat(x_cat_emb, dim=-1)
+            # print(f"{x_categ.shape=}")
+            xs.append(x_categ)
+
+        # add numerical features
+        if self.num_numerical_feature > 0:
+            xs.append(x_num)
+
+        if len(xs) > 1:
+            # concat categorical and numerical
+            x = torch.cat(xs, dim = 1)
+        else:
+            x = xs[0]
+
+        # print(f"{x.shape=}")
+
             
         for layer in self.layers:
             x = layer(x)

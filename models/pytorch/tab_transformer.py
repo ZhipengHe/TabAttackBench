@@ -223,16 +223,20 @@ class TabTransformer(nn.Module):
 
         if not self.num_categories is None:
             x_categ = x[:, self.num_continuous:].long()
-            x_cont = x[:, :self.num_continuous]
+            if self.num_continuous == 0:
+                x_cont = None
+            else:
+                x_cont = x[:, :self.num_continuous]
         else:
             x_categ = None
             x_cont = x
 
         xs = []
 
-        # assert x_categ.shape[-1] == self.num_categories, f'you must pass in {self.num_categories} values for your categories input'
+        
 
         if self.num_unique_categories > 0:
+            # assert x_categ.shape[-1] == self.num_categories, f'you must pass in {self.num_categories} values for your categories input'
             x_cat_emb = []
             start = 0
             for i, item in enumerate(self.categories):
@@ -248,9 +252,9 @@ class TabTransformer(nn.Module):
             flat_categ = x.flatten(1)
             xs.append(flat_categ)
 
-        assert x_cont.shape[1] == self.num_continuous, f'you must pass in {self.num_continuous} values for your continuous input'
 
         if self.num_continuous > 0:
+            assert x_cont.shape[1] == self.num_continuous, f'you must pass in {self.num_continuous} values for your continuous input'
             if exists(self.continuous_mean_std):
                 mean, std = self.continuous_mean_std.unbind(dim = -1)
                 x_cont = (x_cont - mean) / std
