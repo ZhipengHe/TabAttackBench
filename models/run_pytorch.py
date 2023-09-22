@@ -7,9 +7,22 @@ import os
 from .pytorch.mlp import MLP
 from .pytorch.tab_transformer import TabTransformer
 from .pytorch.ft_transformer import FTTransformer
+from .pytorch.logistic_regression import LogisticRegression
 
 def model_config(model, input_dim, output_dim, categories_list, numerical_cols, device):
-    if model == "MLP":
+    if model == "LogisticRegression":
+        model_config = {
+            "input_dim": input_dim,
+            "output_dim": output_dim,
+        }
+        train_config = {
+            "epochs": 20,
+            "batch_size": 512,
+            "learning_rate": 1e-3,
+            "model": "LogisticRegression",
+        }
+        return LogisticRegression(**model_config).to(device), train_config
+    elif model == "MLP":
         model_config = {
             "input_dim": input_dim,
             "output_dim": output_dim,
@@ -23,7 +36,7 @@ def model_config(model, input_dim, output_dim, categories_list, numerical_cols, 
         }
         train_config = {
             "epochs": 20,
-            "batch_size": 256,
+            "batch_size": 512,
             "learning_rate": 1e-3,
             "model": "MLP",
             "dropout": 0.2,
