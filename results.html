@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Adversarial Attacks & Defenses on Tabular Data: A benchmark</title>
+    </head>
+    <body>
+        <h1>Adversarial Attacks & Defenses on Tabular Data: A benchmark</h1>
+        <div>
+            <label for="dataset-select">Select a dataset:</label>
+            <select id="dataset-select">
+                <option value="null">Select a dataset</option>
+                <option value="Adult">Adult</option>
+                <option value="Electricity">Electricity</option>
+                <option value="Higgs">Higgs</option>
+                <!-- Add more options as needed -->
+            </select>
+        </div>
+        <div>
+            <label for="model-select">Select a model:</label>
+            <select id="model-select">
+                <option value="null">Select a model</option>
+                <option value="All">All Models</option>
+                <option value="LogisticRegression">Logistic Regression</option>
+                <option value="MLP">MLP</option>
+                <option value="TabTransformer">TabTransformer</option>
+                <option value="FTTransformer">FTTransformer</option>
+                <!-- Add more options as needed -->
+            </select>
+        </div>
+        <div>
+            <label for="attack-select">Select an attack:</label>
+            <select id="attack-select">
+                <!-- Attack List: "L2Gaussian", "L2Uniform", "LinfUniform", "LinfFGSM", "LinfPGD", "LinfBIM", "L2CarliniWagner", "L2DeepFool" -->
+                <option value="null">Select an attack</option>
+                <option value="All">All Attacks</option>
+                <option value="L2Gaussian">L2Gaussian</option>
+                <option value="L2Uniform">L2Uniform</option>
+                <option value="LinfUniform">LinfUniform</option>
+                <option value="LinfFGSM">LinfFGSM</option>
+                <option value="LinfPGD">LinfPGD</option>
+                <option value="LinfBIM">LinfBIM</option>
+                <option value="L2CarliniWagner">L2CarliniWagner</option>
+                <option value="L2DeepFool">L2DeepFool</option>
+                <!-- Add more options as needed -->
+            </select>
+        </div>
+        <div>
+            <h2>Results</h2>
+            <img id="results" src="" alt=""></img>
+        </div>
+        <script>
+            const attackSelect = document.getElementById("attack-select");
+            const modelSelect = document.getElementById("model-select");
+            const datasetSelect = document.getElementById("dataset-select");
+            const resultsDiv = document.getElementById("results");
+            const updateResults = () => {
+                const attack = attackSelect.value;
+                const model = modelSelect.value;
+                const dataset = datasetSelect.value;
+                const url = `./results/figures/${dataset}_${model}_${attack}.png`;
+                // if model or attack is "null", then no results are available
+                if (model === "null" || attack === "null" || dataset === "null") {
+                    resultsDiv.src = "";
+                    resultsDiv.alt = "";
+                    return;
+                }
+
+                resultsDiv.src = url;
+                resultsDiv.alt = `Results for ${attack} attack(s) on ${model} model(s) trained on ${dataset} dataset.`;
+
+            };
+            attackSelect.addEventListener("change", updateResults);
+            modelSelect.addEventListener("change", updateResults);
+            datasetSelect.addEventListener("change", updateResults);
+        </script>
+    </body>
+</html>
