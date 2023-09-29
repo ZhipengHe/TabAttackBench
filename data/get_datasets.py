@@ -243,8 +243,12 @@ def get_dataclass(dataset_name):
         data[target_col] = data[target_col].apply(DATASET_INFO[dataset_name]["target_transform"])
 
     # Check for and keep columns with more than one unique value
-    columns_with_values = data.columns[data.notna().any()].tolist()
+    columns_with_values = []
+    for col in data.columns:
+        if data[col].nunique() > 1:
+            columns_with_values.append(col)
     data = data[columns_with_values]
+
 
     # Define categorical and numerical columns
     categorical_cols = [col for col in DATASET_INFO[dataset_name]["categorical_cols"] if col in columns_with_values]
@@ -272,7 +276,12 @@ def get_dataclass(dataset_name):
 
 
     # Apply MinMacScaler [0, 1] to numerical columns
-    scaled_df, scaler = min_max_scale_numerical(data, numerical_cols)
+    if len(numerical_cols) > 0:
+        scaled_df, scaler = min_max_scale_numerical(data, numerical_cols)
+    else:
+        scaled_df = data
+        scaler = None
+
 
     # Get one-hot encoded features.
     dummy_df = pd.get_dummies(
@@ -316,12 +325,43 @@ def get_split(dataset_name, device):
 
 
     # Convert the data to PyTorch tensors
-    X_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device)
-    y_train_tensor = torch.tensor(y_train, dtype=torch.long).to(device)
-    X_test_tensor = torch.tensor(X_test, dtype=torch.float32).to(device)
-    y_test_tensor = torch.tensor(y_test, dtype=torch.long).to(device)
-    X_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(device)
-    y_val_tensor = torch.tensor(y_val, dtype=torch.long).to(device)
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train, dtype=torch.long)
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    y_test_tensor = torch.tensor(y_test, dtype=torch.long)
+    X_val_tensor = torch.tensor(X_val, dtype=torch.float32)
+    y_val_tensor = torch.tensor(y_val, dtype=torch.long)
+
+
+    # Return the training and test sets
+    return X_train, y_train, X_val, y_val, X_test, y_test, \
+        X_train_tensor, y_train_tensor, X_test_tensor, y_test_tensor, X_val_tensor, y_val_tensor, \
+        df_info
+
+def get_split_continues(dataset_name, device):
+
+    df_info = get_dataclass(dataset_name)
+
+    train_df, test_df = train_test_split(
+        df_info.dummy_df, test_size=0.2, random_state=42, shuffle=True
+    )
+    train_df, val_df = train_test_split(train_df, test_size=0.125, random_state=42, shuffle=True)
+
+    X_train = np.array(train_df[df_info.numerical_cols])
+    y_train = np.array(train_df[df_info.target_name])
+    X_val = np.array(val_df[df_info.numerical_cols])
+    y_val = np.array(val_df[df_info.target_name])
+    X_test = np.array(test_df[df_info.numerical_cols])
+    y_test = np.array(test_df[df_info.target_name])
+
+
+    # Convert the data to PyTorch tensors
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train, dtype=torch.long)
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    y_test_tensor = torch.tensor(y_test, dtype=torch.long)
+    X_val_tensor = torch.tensor(X_val, dtype=torch.float32)
+    y_val_tensor = torch.tensor(y_val, dtype=torch.long)
 
 
     # Return the training and test sets
@@ -334,7 +374,7 @@ if __name__ == "__main__":
     import pickle
 
     # Test the get_dataset function
-    lists = ["Adult", "Electricity", "Higgs", "KDDCup09_appetency", "Mushroom"] # "Adult", "Electricity", "Higgs", "KDDCup09_appetency", "Mushroom"
+    lists = ["Adult", "Electricity", "Higgs", "Mushroom"] # "Adult", "Electricity", "Higgs", "KDDCup09_appetency", "Mushroom"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

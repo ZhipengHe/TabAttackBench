@@ -24,7 +24,7 @@ The dataset is a classification task to predict the class of a power plant based
 
 #### Higgs - Numerical only, 10s of features
 
-The dataset is a classification task to predict whether a given particle is a Higgs boson or not based on the collected features. The dataset has 98050 instances and 28 features. The dataset has 2 classes. The dataset is retrieved from [Higgs](https://www.openml.org/d/23512) on [OpenML](https://www.openml.org/)
+The dataset is a classification task to predict whether a given particle is a Higgs boson or not based on the collected features. The dataset has 1000000 instances and 28 features. The dataset has 2 classes. The dataset is retrieved from [Higgs](https://www.openml.org/d/23512) on [OpenML](https://www.openml.org/)
 
 #### KDDCup09_appetency - Mixed, 100s of features
 
@@ -44,9 +44,11 @@ The data profile of the datasets is shown in the following table:
 | --- | --- | --- | --- | --- | --- |
 | Adult | 48842 | 15 | 2 | 6 | 9 |
 | Electricity | 45312 | 9 | 2 | 9 | 0 |
-| Higgs | 98050 | 28 | 2 | 28 | 0 |
+| Higgs | 1000000 | 28 | 2 | 28 | 0 |
 | KDDCup09_appetency | 50000 | 230 | 2 | 190 | 40 |
 | Mushroom | 8124 | 22 | 2 | 0 | 22 |
+
+TODO: Add pure numerical datasets
 
 ### Data preprocessing
 

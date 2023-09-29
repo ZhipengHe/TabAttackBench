@@ -124,5 +124,5 @@ DATASET_INFO = {
         "feature_transform": {
             ""
         },
-    }
+    },
 }
