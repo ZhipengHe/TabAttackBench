@@ -32,11 +32,11 @@ Experiment settings for adversarial attacks.
 
 |  | LR | MLP | TabTransformer | FTTransformer | TabNet |
 | --- | --- | --- | --- | --- | --- |
-| **L2Gaussian** |  | ✔️ |  |  |  |
-| **L2Uniform** |  | ✔️ |  |  |  |
-| **LinfUniform** |  | ✔️ |  |  |  |
-| **LinfFGSM** |  | ✔️ |  |  |  |
-| **LinfPGD** |  | ✔️ |  |  |  |
-| **LinfBIM** |  | ✔️ |  |  |  |
-| **L2DeepFool** |  |  |  |  |  |
-| **L2CarliniWagner** |  |  |  |  |  |
+| **L2Gaussian** | ✔️ | ✔️ | ✔️ | ✔️ |  |
+| **L2Uniform** | ✔️ | ✔️ | ✔️ | ✔️ |  |
+| **LinfUniform** | ✔️ | ✔️ | ✔️ | ✔️ |  |
+| **LinfFGSM** | ✔️ | ✔️ | ✔️ | ✔️ |  |
+| **LinfPGD** | ✔️ | ✔️ | ✔️ | ✔️ |  |
+| **LinfBIM** | ✔️ | ✔️ | ✔️ | ✔️ |  |
+| **L2DeepFool** | ✔️ | ✔️ | ✔️ | ✔️ |  |
+| **L2CarliniWagner** | ✔️ | ✔️ | ✔️ | ✔️ |  |

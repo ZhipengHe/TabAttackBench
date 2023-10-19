@@ -14,6 +14,9 @@ from itertools import chain
 
 from .data_config import DATASET_INFO
 
+# import data_config
+# DATASET_INFO = data_config.DATASET_INFO
+
 @dataclass
 class DfInfo:
 
@@ -174,6 +177,9 @@ def remove_missing_values(df):
         if '?' in list(df[col].unique()):
             ### Replace the missing value by the most common.
             df.loc[df[col] == '?', col] = df[col].value_counts().index[0]
+        # if value is nan, replace it with the most common value
+        if df[col].isnull().values.any():
+            df[col] = df[col].fillna(df[col].value_counts().index[0])
             
     return df
 
@@ -206,9 +212,11 @@ def load_dataset(dataset_name):
             response = requests.get(url)
             with open(local_file_path, 'wb') as f:
                 f.write(response.content)
-        
-        data = pd.read_csv(local_file_path, header=None, names=column_names, 
+        if file_extension == '.data':
+            data = pd.read_csv(local_file_path, header=None, names=column_names, 
                            sep=',\s*', engine='python')
+        else:
+            data = pd.read_csv(local_file_path, header=0, names=column_names)
 
     elif file_extension == '.arff':
         if not os.path.isfile(local_file_path):
@@ -218,7 +226,17 @@ def load_dataset(dataset_name):
 
         data, meta = arff.loadarff(local_file_path)
 
-        data = pd.DataFrame(data)
+        data = pd.DataFrame(data, columns=column_names)
+
+        data = data.applymap(lambda x: x.decode('utf-8') if isinstance(x, bytes) else x)
+
+        try:
+            data = data.rename(columns=dict(zip(column_names, DATASET_INFO[dataset_name]["original_column_names"])))
+            column_names = DATASET_INFO[dataset_name]["original_column_names"]
+        except:
+            pass
+        # if DATASET_INFO[dataset_name]["original_column_names"] is not None:
+        #     data = data.rename(columns=dict(zip(column_names, DATASET_INFO[dataset_name]["original_column_names"])))
         
     else:
         raise ValueError(f"Unsupported file format for URL: {url}")
@@ -231,6 +249,13 @@ def load_dataset(dataset_name):
 def get_dataclass(dataset_name):
 
     data, column_names = load_dataset(dataset_name)
+
+    # First 1599 rows for Red Wine Quality dataset
+    if dataset_name == "WineQuality-Red":
+        data = data.iloc[:1599]
+    # instances 1600 to 6497 for White Wine Quality dataset
+    elif dataset_name == "WineQuality-White":
+        data = data.iloc[1599:]
 
     target_col = DATASET_INFO[dataset_name]["target_col"]
 
@@ -247,6 +272,13 @@ def get_dataclass(dataset_name):
     for col in data.columns:
         if data[col].nunique() > 1:
             columns_with_values.append(col)
+
+    if dataset_name == "eye_movements":
+        columns_with_values.remove("lineNo")
+    
+    if dataset_name == "BreastCancer":
+        columns_with_values.remove("id")
+
     data = data[columns_with_values]
 
 
@@ -374,14 +406,23 @@ if __name__ == "__main__":
     import pickle
 
     # Test the get_dataset function
-    lists = ["Adult", "Electricity", "Higgs", "Mushroom"] # "Adult", "Electricity", "Higgs", "KDDCup09_appetency", "Mushroom"
+    lists = ["WineQuality-Red", "WineQuality-White"] # "Adult", "Electricity", "Higgs", "KDDCup09_appetency", "Mushroom", "Diabetes", "BreastCancer", "GermanCredit", "BankMarketing", 
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # df, _ = load_dataset("BreastCancer")
+    # print(df.head())
+
+    # print(df['label'].unique().tolist())
 
     for data in lists:
         X_train, y_train, X_val, y_val, X_test, y_test, \
             X_train_tensor, y_train_tensor, X_test_tensor, y_test_tensor, X_val_tensor, y_val_tensor, \
             info = get_split(data, device)
+        
+        print(info.dummy_df.head())
+
+        # print(info.dummy_df['label'].unique())
         
         # Save the data and info to a local file
         output_filename = f"data/datasets/{data}_processed.pkl"
