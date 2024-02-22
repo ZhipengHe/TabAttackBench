@@ -212,7 +212,9 @@ class TabTransformer(nn.Module):
             input_size = (dim * sum(categories)) + num_continuous
         else:
             input_size = num_continuous
-        l = input_size // 8
+        # if input_size < 8, l = 1, else l = input_size // 8:
+        l = 1 if input_size < 8 else input_size // 8
+
 
         hidden_dimensions = list(map(lambda t: l * t, mlp_hidden_mults))
         all_dimensions = [input_size, *hidden_dimensions, dim_out]
@@ -221,7 +223,7 @@ class TabTransformer(nn.Module):
 
     def forward(self, x, return_attn = False):
 
-        if not self.num_categories is None:
+        if self.num_categories > 0:
             x_categ = x[:, self.num_continuous:].long()
             if self.num_continuous == 0:
                 x_cont = None
@@ -233,7 +235,6 @@ class TabTransformer(nn.Module):
 
         xs = []
 
-        
 
         if self.num_unique_categories > 0:
             # assert x_categ.shape[-1] == self.num_categories, f'you must pass in {self.num_categories} values for your categories input'
