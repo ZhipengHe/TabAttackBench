@@ -1,91 +1,86 @@
 # TabAttackBench: A Benchmark for Tabular Data Adversarial Attacks
 
-## Introduction
+## Abstract
 
-[TODO]
+Adversarial attacks pose a significant threat to machine learning models by inducing incorrect predictions through imperceptible perturbations to input data. While these attacks have been extensively studied in unstructured data like images, their application to tabular data presents new challenges. These challenges arise from the inherent heterogeneity and complex feature interdependencies in tabular data, which differ significantly from those in image data. To address these differences, it is crucial to consider imperceptibility as a key criterion specific to tabular data. Most current research focuses primarily on achieving effective adversarial attacks, often overlooking the importance of maintaining imperceptibility. To address this gap, we propose a new benchmark for adversarial attacks on tabular data that evaluates both effectiveness and imperceptibility. In this study, we assess the effectiveness and imperceptibility of five adversarial attacks across four models using eleven tabular datasets, including both mixed and numerical-only datasets. Our analysis explores how these factors interact and influence the overall performance of the attacks. We also compare the results across different dataset types to understand the broader implications of these findings. The findings from this benchmark provide valuable insights for improving the design of adversarial attack algorithms, thereby advancing the field of adversarial machine learning on tabular data.
 
-## Background
+## Overview
 
-To find an adversarial example for data point $x$, the problem can be define as follows:
+TabAttackBench is a benchmark suite for evaluating adversarial attacks on tabular data. It focuses on both the effectiveness and imperceptibility of attacks, providing a comprehensive comparison across multiple models and datasets.
 
-$$ x^{adv} = x + \delta$$
+## Project Structure
 
-where $\delta$ is the perturbation. The goal is to find $\delta$ such that $x^{adv}$ is misclassified by the model. Then, we introduce the perturbation budget $\epsilon$ to clip the perturbation $\delta$ such that $\|\delta\|_p \leq \epsilon$.
+- **attacks/**: Implementations and configuration for adversarial attack methods.
+- **models/**: Contains model definitions, training scripts, and assets for predictive models (including PyTorch models).
+- **utils/**: Utility functions and helpers used throughout the project.
+- **data/**: Dataset loading, configuration, and management scripts. Includes subfolders for raw datasets and assets.
+- **datapoints/**: Stores generated adversarial examples and perturbed data for each attack/dataset/model combination.
+- **results/**: Aggregated results, figures, and summary CSVs from experiments. Includes pickled results for each model/attack/dataset.
+- **configs/**: Configuration files for attacks, models, and experiment settings.
+- **result_evaluation.ipynb**: Jupyter notebook for evaluating and visualizing benchmark results.
+- **generate_adversarial_examples.ipynb**: Notebook for generating adversarial examples using different attacks.
+- **model_training.ipynb**: Notebook for training predictive models on tabular datasets.
+- **model_hyperparameter_search.ipynb**: Notebook for hyperparameter tuning of models.
+- **dataset_profiling.ipynb**: Notebook for profiling and analyzing dataset characteristics.
+- **best_epsilons.csv**: Stores the best perturbation budgets ($\epsilon$) found for each experiment.
+- **results.html**: Main results page for browsing benchmark outcomes.
 
-For white-box adversarial attacks, there are two main approaches to find the perturbation $\delta$: bounded attacks and unbounded attacks. For bounded attacks, the perturbation $\delta$ is constrained by the perturbation budget $\epsilon$. For unbounded attacks, the perturbation $\delta$ is not constrained by the perturbation budget $\epsilon$.
+## Dataset Profiles
+
+Below is a summary of the 11 datasets used in the benchmark, including the total number of instances, splits, and feature counts:
+
+| Dataset            | N_total  | N_train | N_validate | N_test | x_num | x_cat | x_encoded | x_total |
+|--------------------|----------|---------|------------|--------|-------|-------|-----------|---------|
+| Adult              | 32,561   | 22,792  | 3,256      | 6,513  | 6     | 8     | 99        | 105     |
+| Electricity        | 45,312   | 31,717  | 4,532      | 9,063  | 7     | 1     | 7         | 14      |
+| COMPAS             | 16,644   | 11,650  | 1,665      | 3,329  | 8     | 8     | 50        | 58      |
+| Higgs              | 1,000,000| 700,000 | 100,000    | 200,000| 28    | 0     | 0         | 28      |
+| house_16H          | 22,784   | 15,948  | 2,279      | 4,557  | 16    | 0     | 0         | 16      |
+| jm1                | 10,885   | 7,619   | 1,089      | 2,177  | 21    | 0     | 0         | 21      |
+| BreastCancer       | 569      | 398     | 57         | 114    | 30    | 0     | 0         | 30      |
+| WineQuality-White  | 4,898    | 3,428   | 490        | 980    | 11    | 0     | 0         | 11      |
+| WineQuality-Red    | 1,599    | 1,119   | 160        | 320    | 11    | 0     | 0         | 11      |
+| phoneme            | 5,404    | 3,782   | 541        | 1,081  | 5     | 0     | 0         | 5       |
+| MiniBooNE          | 130,064  | 91,044  | 13,007     | 26,013 | 50    | 0     | 0         | 50      |
+
+## Model Information
+
+The benchmark evaluates adversarial attacks across four types of predictive models:
+
+- **Logistic Regression**: A linear model commonly used for binary and multiclass classification tasks. It serves as a strong baseline for tabular data.
+- **MLP (Multilayer Perceptron)**: A feedforward neural network with one or more hidden layers, capable of modeling complex nonlinear relationships in tabular data.
+- **TabTransformer**: A transformer-based architecture designed specifically for tabular data, leveraging attention mechanisms to capture feature interactions, especially for categorical features. [Reference](https://github.com/lucidrains/tab-transformer-pytorch)
+- **FTTransformer**: An efficient transformer variant for tabular data, focusing on fast training and inference while maintaining high accuracy. [Reference](https://github.com/lucidrains/tab-transformer-pytorch)
+
+## Attack Methods
 
 ### Bounded Attacks
+- **FGSM (Fast Gradient Sign Method):** One-step, uses the sign of the gradient.
+- **BIM (Basic Iterative Method):** Multi-step, iterative FGSM.
+- **PGD (Projected Gradient Descent):** Multi-step, generalizes BIM.
 
-$$max_{\delta} \{J(\theta, x + \delta, y)\}, \text{subject to}\|\delta\|_p \leq \epsilon$$
+All bounded attacks constrain the perturbation $\delta$ by a budget $\epsilon$:
 
-where $J(\theta, x, y)$ is the loss function, $\theta$ is the model parameters, $x$ is the input data, $y$ is the ground truth label, and $\epsilon$ is the perturbation budget.
-
-1. Fast Gradient Sign Method (FGSM)
-
-    The Fast Gradient Sign Method (FGSM) is a white-box attack. It is a one-step attack that uses the gradient of the loss function to find the perturbation $\delta$.
-
-    $$ \delta = \epsilon \cdot sign(\nabla_x J(\theta, x, y))$$
-
-    where $J(\theta, x, y)$ is the loss function, $\theta$ is the model parameters, $x$ is the input data, $y$ is the ground truth label, and $\epsilon$ is the perturbation budget.
-
-2. Basic Iterative Method (BIM)
-
-    The Basic Iterative Method (BIM) is a white-box attack. It is a multi-step attack that uses the gradient of the loss function to find the perturbation $\delta$.
-
-    $$ x^{adv}_{t+1} = Clip_{x, \epsilon} \{x^{adv}_t + \alpha \cdot sign(\nabla_x J(\theta, x^{adv}_t, y))\}$$
-
-    where $J(\theta, x, y)$ is the loss function, $\theta$ is the model parameters, $x$ is the input data, $y$ is the ground truth label, $\epsilon$ is the perturbation budget, and $\alpha$ is the step size.
-
-3. Projected Gradient Descent (PGD)
-
-    The Projected Gradient Descent (PGD) is a white-box attack. It is a multi-step attack that uses the gradient of the loss function to find the perturbation $\delta$.
-
-    $$ x^{adv}_{t+1} = Clip_{x, \epsilon} \{x^{adv}_t + \alpha \cdot sign(\nabla_x J(\theta, x^{adv}_t, y))\}$$
-
-    where $J(\theta, x, y)$ is the loss function, $\theta$ is the model parameters, $x$ is the input data, $y$ is the ground truth label, $\epsilon$ is the perturbation budget, and $\alpha$ is the step size.
-
-    > Note: The PGD attack is equivalent to the BIM attack when the step size $\alpha$ is equal to the perturbation budget $\epsilon$.
+$$ x^{adv} = x + \delta, \quad \|\delta\|_p \leq \epsilon $$
 
 ### Unbounded Attacks
+- **C&W (Carlini & Wagner):** Minimizes $L_2$ perturbation plus a confidence term.
+- **DeepFool:** Finds the closest decision boundary under a linear approximation.
 
-Minimizing the distance between the adversarial example $x^{adv}$ and the original data point $x$ is a common approach for unbounded attacks. The distance can be measured by the $L_p$ norm, where $p$ is a positive integer.
+Unbounded attacks minimize the distance between $x$ and $x^{adv}$, subject to misclassification:
 
-$$min_{\delta} \{\|\delta\|_p\}, \text{ subject to } f(x + \delta) \neq f(x)$$
+$$ \min_{\delta} \|\delta\|_p, \quad \text{subject to } f(x + \delta) \neq f(x) $$
 
-where $f(x)$ is the predicted label of the data point $x$, and $f(x + \delta)$ is the predicted label of the adversarial example $x^{adv}$.
-
-
-1. Carlini & Wagner (C&W)
-
-    The Carlini & Wagner (C&W) attack is an unbounded attack. For the $L_2$ norm, the C&W attack is defined as follows:
-
-    $$min_{\delta} \{\|\delta\|_2 + c \cdot f(x + \delta)\} $$
-
-    where $f(x + \delta)$ is the confidence of the adversarial example $x^{adv}$, and $c$ is a constant.
-
-    $$ f(x + \delta) = max(max\{Z(x + \delta)_i: i \neq t\} - Z(x + \delta)_t, -\kappa)$$
-
-    where $Z(x + \delta)$ is the logits of the adversarial example $x^{adv}$, $t$ is the ground truth label, $\kappa$ is a constant, and $c$ is a constant.
-
-2. DeepFool
-
-    The DeepFool attack is an unbounded attack. It assumes that the decision boundary of the model is linear and attempts to find the closest decision boundary to the original data point $x$. Given a hyperplane $H = \{x: w^Tx + b = 0\}$, it separates the data points into two classes: $H^+$ and $H^-$. The distance between the data point $x$ and the hyperplane $H$ is defined as follows:
-
-    $$ d(x, H) = -\frac{w^Tx + b}{\|w\|_2} \text{ subject to } f(x) \neq f(x^{adv})$$
-
-    where $f(x)$ is the predicted label of the data point $x$, and $f(x^{adv})$ is the predicted label of the adversarial example $x^{adv}$. 
-
-
+### Random Noise Baselines
+- **Linf Gaussian Noise:** Gaussian noise clipped by $\epsilon$.
 
 ## Results
 
-The results of the benchmark are available in [result page](./results.html).
+Results are available in the [result page](./results.html).
 
-
-
-
-
-
+### How to Analyze the Results
+- Compare different attack methods on a single predictive model (with varying perturbation budgets).
+- Compare different predictive models for a single attack method.
 
 ## Acknowledgements
 
@@ -93,6 +88,5 @@ We would like to thank these public repositories from which we have borrowed cod
 
 - **Predictive Models**
     - Implementation of TabTransformer and FTtransformer: https://github.com/lucidrains/tab-transformer-pytorch
-
 - **Attack Methods**
     - Foolbox: https://github.com/bethgelab/foolbox
