@@ -1,0 +1,33 @@
+name: Deploy Results to Branch
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'results/figures/**'
+      - 'results.html'
+
+jobs:
+  deploy-results:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p deploy
+          cp -r results/figures/* deploy/
+          if [ -f results.html ]; then
+            cp results.html deploy/
+          fi
+
+      - name: Deploy to results-deploy branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy
+          publish_branch: results-deploy
+          keep_files: true
